@@ -7,8 +7,8 @@ const Footer = () => {
         <p className="text-slate-400 font-semibold mb-1">
           Curso Fullstack JS 2026 • Catálogo Comercial DummyJSON
         </p>
-        <p>© 2026 Todos los derechos reservados. Desarrollado en clase con React y Tailwind CSS.</p>
-      </div>
+        <p>© 2026  Todos los derechos reservados. Desarrollado en clase con React y Tailwind CSS.</p>
+      </div> 
     </footer>
   );
 };
