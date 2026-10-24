@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import FiltroCategorias from './FiltroCategorias';
+import { useCarrito } from '../context/CarritoContext';
 
 const Header = () => {
   // Estado local para abrir/cerrar el dropdown de categorías
   const [openDropdown, setOpenDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  // El contador reactivo que viene del contexto global
+  const { totalArticulos } = useCarrito();
+
 
   // Cerrar el dropdown automáticamente al hacer clic en cualquier parte fuera de él
   useEffect(() => {
@@ -22,7 +26,7 @@ const Header = () => {
     <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl backdrop-blur-md bg-slate-900/90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 gap-4">
-          
+
           {/* Logotipo */}
           <Link to="/" className="flex items-center gap-2 text-white no-underline group flex-shrink-0">
             <span className="text-2xl group-hover:scale-110 transition-transform">🛍️</span>
@@ -37,10 +41,9 @@ const Header = () => {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all no-underline ${
-                  isActive
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all no-underline ${isActive
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`
               }
             >
@@ -53,11 +56,10 @@ const Header = () => {
               <button
                 type="button"
                 onClick={() => setOpenDropdown(!openDropdown)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                  openDropdown
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${openDropdown
                     ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-600/20'
                     : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 border-slate-700/80'
-                }`}
+                  }`}
               >
                 <span>📂</span>
                 <span>Todas las Categorías</span>
@@ -80,7 +82,24 @@ const Header = () => {
                   <FiltroCategorias onSelect={() => setOpenDropdown(false)} />
                 </div>
               )}
+              
             </div>
+            <div>
+                {/* Carrito con badge reactivo */}
+                <Link
+                  to="/carrito"
+                  className="relative p-2 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-all flex items-center justify-center no-underline"
+                  title="Ver carrito de compras"
+                >
+                  <span className="text-xl">🛒</span>
+                  {totalArticulos > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[11px] font-black rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center shadow-md">
+                      {totalArticulos > 99 ? '99+' : totalArticulos}
+                    </span>
+                  )}
+                </Link>
+
+              </div>
           </nav>
 
         </div>

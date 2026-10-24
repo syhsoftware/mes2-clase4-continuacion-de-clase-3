@@ -4,9 +4,12 @@ import { useParams, Link } from 'react-router-dom';
 // 🌐 1. Endpoint base declarado arriba y fuera del componente
 const API = 'https://dummyjson.com/products/';
 
+import { useCarrito } from '../context/CarritoContext';
+
 const Detalle = () => {
     // 1. Capturamos el parámetro dinámico definido en la ruta: <Route path="/detalle/:id" />
     const { id } = useParams();
+    const { calcularPrecio, formatearBs, agregarAlCarrito } = useCarrito();
 
     // 2. La Tríada Asíncrona de Estados
     const [producto, setProducto] = useState(null);
@@ -15,6 +18,9 @@ const Detalle = () => {
 
     // 3. Estado local para la miniatura activa en la galería
     const [fotoActiva, setFotoActiva] = useState(null);
+
+    // Estado local para el feedback del botón.
+    const [agregado, setAgregado] = useState(false);
 
     // 4. useEffect con dependencia [id]: si el usuario pasa al producto 5 y luego al 8, se refresca
     useEffect(() => {
@@ -46,6 +52,7 @@ const Detalle = () => {
                 setLoading(false);
             }
         };
+
 
         fetchProducto();
         return () => controller.abort();
@@ -79,6 +86,19 @@ const Detalle = () => {
     }
 
 
+    // ---------------------------------------------------------------------
+    // PASO 3: después de las guardas de loading y error.
+    // ---------------------------------------------------------------------
+    const precioFinal = calcularPrecio(producto);
+    const tieneDescuento = Number(producto.discountPercentage) > 0;
+    const agotado = Number(producto.stock) <= 0;
+
+
+    const handleAgregar = () => {
+        agregarAlCarrito(producto);
+        setAgregado(true);
+        setTimeout(() => setAgregado(false), 1200);
+    };
 
     //bolivares 
     const tasa = 980;
@@ -169,18 +189,37 @@ const Detalle = () => {
                         {/* Caja de Precio y Botón de Compra */}
                         <div className="p-6 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
                             <div>
-                                <span className="text-xs text-slate-400 block font-medium">Precio Oficial</span>
-                                <span className="text-3xl font-black text-white">$ {producto.price}</span>
-                                <span className="text-xs text-slate-400 block font-medium">Precio Bs</span>
-                                <span className="text-3xl font-black text-white">$ {(producto.price * tasa).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} bs</span>
-                            </div>
+                                <span className="text-xs text-slate-400 block font-medium">
+                                    Precio Final
+                                </span>
 
+                                <span className="text-4xl font-black text-white">
+                                    {'$ ' + Number(precioFinal).toFixed(2)}
+                                </span>
+
+                                {tieneDescuento && (
+                                    <span className="block text-xs text-slate-500 line-through">
+                                        {'$ ' + Number(producto.price).toFixed(2)}
+                                    </span>
+                                )}
+
+                                {tieneDescuento && (
+                                    <span className="inline-block mt-1 text-[10px] font-black text-rose-300 bg-rose-500/10 border border-rose-500/30 px-1.5 py-0.5 rounded">
+                                        -{Math.round(Number(producto.discountPercentage))}%
+                                    </span>
+                                )}
+
+                                <span className="block text-sm font-bold text-cyan-300 mt-1">
+                                    {formatearBs(precioFinal)}
+                                </span>
+                            </div>
                             <button
                                 type="button"
-                                onClick={() => alert(`¡Compraste ${producto.title}!`)}
-                                className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold rounded-xl text-sm shadow-xl shadow-emerald-600/30 transition-all cursor-pointer"
+                                onClick={handleAgregar}
+                                disabled={agotado}
+                                className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold rounded-xl text-sm shadow-xl shadow-emerald-600/30 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                             >
-                                Añadir al Carrito
+                                {agotado ? 'Agotado' : agregado ? '✓ Agregado' : 'Añadir al Carrito'}
                             </button>
                         </div>
                         <div className="p-6 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
